@@ -27,7 +27,7 @@ var tal=gsap.timeline({scrollTrigger:{
   markers:false
 }})
 tal.from(".img1-container",{
-  x:'60px',
+  x:'center 50%',
   y:'20px'
 
 })
@@ -190,5 +190,68 @@ document.addEventListener("DOMContentLoaded", function() {
               history.pushState("", document.title, id);
           }
       }
+  });
+});
+
+
+// Ensure ScrollTrigger and GSAP are registered
+gsap.registerPlugin(ScrollTrigger);
+
+document.addEventListener("DOMContentLoaded", function() {
+  const sections = document.querySelectorAll('.page');
+  let activeIndex = 0;
+
+  function activateSection(index) {
+    sections.forEach((section, i) => {
+      section.classList.remove('active', 'previous', 'next');
+      if (i < index) {
+        section.classList.add('previous');
+      } else if (i > index) {
+        section.classList.add('next');
+      } else {
+        section.classList.add('active');
+      }
+    });
+  }
+
+  // Initial activation
+  activateSection(activeIndex);
+
+  // Scroll trigger setup
+  sections.forEach((section, index) => {
+    ScrollTrigger.create({
+      trigger: section,
+      start: "top center",
+      end: "bottom center",
+      onEnter: () => activateSection(index),
+      onEnterBack: () => activateSection(index),
+      markers: false,
+      scrub: true,
+    });
+  });
+
+  // Handle swipe gestures for mobile devices
+  let startX = 0;
+  let endX = 0;
+
+  document.addEventListener('touchstart', function(event) {
+    startX = event.changedTouches[0].screenX;
+  });
+
+  document.addEventListener('touchend', function(event) {
+    endX = event.changedTouches[0].screenX;
+    if (startX - endX > 50) {
+      // Swipe left
+      if (activeIndex < sections.length - 1) {
+        activeIndex++;
+        activateSection(activeIndex);
+      }
+    } else if (endX - startX > 50) {
+      // Swipe right
+      if (activeIndex > 0) {
+        activeIndex--;
+        activateSection(activeIndex);
+      }
+    }
   });
 });
